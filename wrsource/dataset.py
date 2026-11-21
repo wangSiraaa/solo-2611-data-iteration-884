@@ -247,7 +247,10 @@ def _write_json(path: str, obj) -> None:
 def build_dataset(service, version: int, seed: bytes, quotas: Dict[str, int],
                   out_dir: str, parallel: bool = False, workers: int = 0,
                   write: bool = True) -> Tuple[dict, List[dict]]:
-    service.get_version(version)
+    # A merged preview view names itself (e.g. merged-preview:<hash>); the
+    # master service simply echoes the integer version back.
+    reported = service.get_version(version)
+    version = reported.get("version_id", version)
     counts = service.group_counts(version)
     quotas = _resolve_quotas(counts.keys(), quotas)
     needed = {g for g, q in quotas.items() if q > 0}
